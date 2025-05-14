@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: AuthJwtTemplate
+  jpa:
+    generate-ddl: false
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MySQL8Dialect
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/ms_bank_scu?serverTimezone=UTC
+    username: root
+    password: root123
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "mahmoodselawe5@gmail.com"
+    password: "buys qvpc ifbr dqhn"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+application:
+  security:
+    jwt:
+      secret-key: 8150e2bf70a8b62105a46ffedb868e94a8aa389110e6ba5c64148c1b32ef162d
+      expiration: 86400000 #one day
+      refresh-token:
+        expiration: 604800000 #7day
+
+
+logging:
+  level:
+    org.springframework.security: TRACE
+
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    org.springframework.security.web: DEBUG
+#    org.springframework.security.config: DEBUG
