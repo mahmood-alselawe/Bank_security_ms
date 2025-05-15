@@ -28,6 +28,7 @@ public class BankModel {
     private String status;
     private boolean locked;
     private String lockReason;
+    private String imageUrl;
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;

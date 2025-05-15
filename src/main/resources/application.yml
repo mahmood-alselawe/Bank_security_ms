@@ -31,6 +31,13 @@ application:
       expiration: 86400000 #one day
       refresh-token:
         expiration: 604800000 #7day
+aws:
+  access:
+    key: ${AWS_ACCESS_KEY}
+  Secret:
+    key: ${AWS_SECRET_KEY}
+  region: us-east-1
+
 
 
 logging:

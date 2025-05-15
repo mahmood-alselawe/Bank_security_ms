@@ -11,12 +11,15 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BankAccountRequest {
+public class AccountResponse {
 
-    private String otherName;
-    private String gender;
+    private Long id;
     private String address;
     private String stateOfOrigin;
+    private AccountInfo accountInfo;
+    private String gender;
     private String status;
+    private boolean locked;
+    private String imageUrl;
 
 }

@@ -14,12 +14,22 @@ import com.takarub.AuthJwtTemplate.service.EmailServiceImpl;
 import com.takarub.AuthJwtTemplate.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +45,8 @@ public class BankServiceImpl implements BankService {
     private final OtpService otpService;
 
     private final TransactionLogService transactionLogService;
+
+    private final S3Client s3Client;
     @Override
     public BankResponse createBankAccount(String email,BankAccountRequest request) {
 
@@ -95,7 +107,6 @@ public class BankServiceImpl implements BankService {
                         .build())
                 .build();
     }
-
     @Override
     public String nameEnquiry(String accountNumber) {
         BankModel account = getAccountOrThrow(accountNumber);
@@ -134,7 +145,7 @@ public class BankServiceImpl implements BankService {
                 .timestamp(LocalDateTime.now())
                 .build());
 
-        // ✅ Clear OTP after use
+
         otpService.clearOtp(request.getAccountNumber());
         // Send email notification
         emailService.sendSimpleMessage(MailBody.builder()
@@ -356,6 +367,101 @@ public class BankServiceImpl implements BankService {
         );
 
         return "Account " + accountNumber + " has been unlocked.";
+    }
+
+
+
+    @Override
+    public String uploadFile(MultipartFile file) {
+        String fileNameExtension = file.getOriginalFilename()
+                .substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+        String key = UUID.randomUUID().toString()+"."+ fileNameExtension;
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket("bankselawe")
+                    .key(key)
+                    .acl("public-read")
+                    .contentType(file.getContentType())
+                    .build();
+            PutObjectResponse response = s3Client.
+                    putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
+
+            if (response.sdkHttpResponse().isSuccessful()){
+                return "https://"+"bankselawe"+".s3.amazonaws.com/"+key;
+            }else {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"file upload file failed");
+            }
+        }catch (IOException e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Aws Error");
+        }
+
+    }
+    @Override
+    public BankResponse createBankAccountWithImage(String email,BankAccountRequest request ,MultipartFile file) {
+        User byEmail = userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("user not found with this email : " + email ));
+        if (bankModelRepository.existsByUserEmail(email)) {
+            throw new BankAccountAlreadyExistsException("User already has a bank account");
+        }
+        String imageUrl = uploadFile(file);
+        BankModel bankModel = BankModel.builder()
+                .otherName(request.getOtherName())
+                .gender(request.getGender())
+                .address(request.getAddress())
+                .stateOfOrigin(request.getStateOfOrigin())
+                .accountNumber(AccountUtils.generateAccountNumber())
+                .accountBalance(BigDecimal.ZERO)
+                .status(request.getStatus())
+                .user(byEmail)
+                .locked(false)
+                .lockReason(null)
+                .imageUrl(imageUrl)
+                .build();
+
+        BankModel saveAfterCreated = bankModelRepository.save(bankModel);
+        emailService.sendSimpleMessage(MailBody.builder()
+                .subject("Account created")
+                .to(saveAfterCreated.getUser().getEmail())
+                .text("You have successfully created a bank account.")
+                .build()
+        );
+
+        return BankResponse
+                .builder()
+                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+                .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
+                .accountInfo(
+                        AccountInfo
+                                .builder()
+                                .accountBalance(saveAfterCreated.getAccountBalance())
+                                .accountNumber(saveAfterCreated.getAccountNumber())
+                                .accountName(saveAfterCreated.getUser().getFirstName() + " " + saveAfterCreated.getUser().getLastName() + " " + saveAfterCreated.getOtherName())
+                                .build()
+                )
+                .build();
+    }
+
+    @Override
+    public AccountResponse findByAccountNumber(String accountNumber) {
+        BankModel byAccountNumber = bankModelRepository.findByAccountNumber(accountNumber);
+        if (!bankModelRepository.existsByAccountNumber(accountNumber)){
+            throw new RuntimeException("Account with account number: " + accountNumber + " does not exist.");
+        }
+        return AccountResponse
+                .builder()
+                .id(byAccountNumber.getId())
+                .status(byAccountNumber.getStatus())
+                .imageUrl(byAccountNumber.getImageUrl())
+                .stateOfOrigin(byAccountNumber.getStateOfOrigin())
+                .locked(byAccountNumber.isLocked())
+                .address(byAccountNumber.getAddress())
+                .gender(byAccountNumber.getGender())
+                .accountInfo(AccountInfo
+                        .builder()
+                        .accountName(getFullName(byAccountNumber))
+                        .accountNumber(byAccountNumber.getAccountNumber())
+                        .accountBalance(byAccountNumber.getAccountBalance())
+                        .build())
+                .build();
     }
 
     private void validateTransferRequest(TransFerRequest request) {
