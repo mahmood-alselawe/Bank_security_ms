@@ -1,119 +1,131 @@
-# 🏦 Bank Security Microservice
+# 🏦 Secure Banking Application
 
-This project is a Spring Boot-based microservice providing authentication, authorization, bank operations (deposit, transfer, etc.), OTP validation, and user account management. It includes integrated Swagger UI for API documentation.
+This is a Spring Boot application that handles user authentication, authorization, OTP verification, and basic banking operations like account creation, transfer, deposit, debit, and transaction logging. It includes a built-in Swagger UI for testing the APIs.
 
-## 📌 Server Information
+## 🌐 Server Environment
 
-- **Base URL (Dev):** `http://localhost:8080`
-- **Swagger UI:** `http://localhost:8080/swagger-ui/index.html`
-
----
-
-## 📂 Project Features
-
-- 🔐 User Authentication and Authorization
-- 🔁 JWT Token Refresh
-- 📧 Email Verification and OTP for secure login and password reset
-- 💳 Bank account management (create, lock, unlock)
-- 💰 Transactions (deposit, debit, transfer)
-- 📜 Transaction Logs
-- 📊 Swagger API Documentation
+- **Base URL (Development):** `http://localhost:8080`
+- **API Documentation:** `http://localhost:8080/swagger-ui/index.html`
 
 ---
 
-## 🚀 API Endpoints
+## ✅ Features
 
-### 🔐 Auth Controller
+- Secure user registration and login
+- JWT-based authentication
+- Email verification and OTP flow
+- Password reset functionality
+- Bank account creation and management
+- Money transfer, deposit, and debit
+- Lock and unlock bank accounts
+- Transaction logs
+- Swagger UI for API testing
+
+---
+
+## 🔐 Forgot Password Flow
+
+To implement a forgot password feature, follow these steps:
+
+1. **Verify Email**
+   - **Endpoint:** `POST /api/v1/auth/verifyMail/{email}`
+   - **Purpose:** Check if the user exists and send an OTP to the provided email.
+
+2. **Verify OTP**
+   - **Endpoint:** `POST /api/v1/auth/verifyOtp/{otp}/{email}`
+   - **Purpose:** Verify the OTP sent to the user's email.
+
+3. **Change Password**
+   - **Endpoint:** `POST /api/v1/auth/changePassword/{email}`
+   - **Purpose:** Reset the user password after OTP verification.
+
+---
+
+## 🔗 API Endpoints
+
+### Auth Controller
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/v1/auth/register` | Register a new user |
-| `POST` | `/api/v1/auth/login` | Log in with email and password |
-| `POST` | `/api/v1/auth/refresh-token` | Refresh the access token |
-| `POST` | `/api/v1/auth/verifyOtp/{otp}/{email}` | Verify OTP for a user |
-| `POST` | `/api/v1/auth/verifyMail/{email}` | Verify a user's email |
-| `POST` | `/api/v1/auth/changePassword/{email}` | Change password using email |
+| `POST` | `/api/v1/auth/login` | Log in user |
+| `POST` | `/api/v1/auth/refresh-token` | Refresh JWT token |
+| `POST` | `/api/v1/auth/verifyMail/{email}` | Verify user's email |
+| `POST` | `/api/v1/auth/verifyOtp/{otp}/{email}` | Verify OTP for user |
+| `POST` | `/api/v1/auth/changePassword/{email}` | Reset password via email |
 
 ---
 
-### 🔄 Forgot Password Flow
-
-1. **Verify Email**  
-   `POST /api/v1/auth/verifyMail/{email}`  
-   → Check if user exists and send OTP to the email.
-
-2. **Verify OTP**  
-   `POST /api/v1/auth/verifyOtp/{otp}/{email}`  
-   → Validate the OTP for the provided email.
-
-3. **Reset Password**  
-   `POST /api/v1/auth/changePassword/{email}`  
-   → Update the password after successful OTP verification.
-
----
-
-### 🏦 Bank Controller
+### User Controller
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/bank/transfer` | Transfer money between accounts |
-| `POST` | `/api/v1/bank/deposit` | Deposit funds to an account |
-| `POST` | `/api/v1/bank/debit` | Withdraw funds from an account |
-| `POST` | `/api/v1/bank/create/{email}` | Create a bank account for a user |
-| `POST` | `/api/v1/bank/create/account/{email}` | Alternate endpoint for creating account |
-| `POST` | `/api/v1/bank/accounts/unlock` | Unlock a user’s account |
-| `POST` | `/api/v1/bank/accounts/lock` | Lock a user’s account |
+| `PATCH` | `/api/v1/users/changePassword` | Authenticated user password change |
+
+---
+
+### OTP Controller
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/otp/generate` | Generate and send OTP to email |
+
+---
+
+### Bank Controller
+
+> **Note:** To use `Transfer`, `Deposit`, and `Debit` operations, you need to generate and verify an OTP first using the OTP API.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/bank/transfer` | Transfer money (OTP required) |
+| `POST` | `/api/v1/bank/deposit` | Deposit money (OTP required) |
+| `POST` | `/api/v1/bank/debit` | Debit (withdraw) money (OTP required) |
+| `POST` | `/api/v1/bank/create/{email}` | Create bank account |
+| `POST` | `/api/v1/bank/create/account/{email}` | Alternate account creation |
+| `POST` | `/api/v1/bank/accounts/unlock` | Unlock user account |
+| `POST` | `/api/v1/bank/accounts/lock` | Lock user account |
 | `GET` | `/api/v1/bank/nameEnquiry` | Get account name by number |
-| `GET` | `/api/v1/bank/findByAccountNumber` | Find account details by number |
-| `GET` | `/api/v1/bank/balanceEnquiry` | Get account balance |
+| `GET` | `/api/v1/bank/findByAccountNumber` | Get details by account number |
+| `GET` | `/api/v1/bank/balanceEnquiry` | Check account balance |
 
 ---
 
-### 📬 OTP Controller
+### Transaction Log Controller
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/otp/generate` | Generate and send OTP to user email |
+| `GET` | `/api/v1/bankLog/transactions` | Retrieve user transaction logs |
 
 ---
 
-### 👤 User Controller
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `PATCH` | `/api/v1/users/changePassword` | Change password for a logged-in user |
-
----
-
-### 📈 Transaction Log Controller
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/v1/bankLog/transactions` | Fetch user’s transaction logs |
-
----
-
-## 🧰 Technologies Used
+## ⚙️ Technologies Used
 
 - Java 17
 - Spring Boot 3.x
 - Spring Security
 - JWT (JSON Web Tokens)
-- Swagger / OpenAPI
-- AWS SES (for sending OTPs via email)
+- Swagger/OpenAPI
 - Lombok
 - Maven
+- AWS SES (for sending OTPs)
 
 ---
 
-## 📄 License
+## 🙏 Thank You
+
+Thank you for using this Secure Banking Application!  
+If you have any questions or feedback, feel free to open an issue or reach out.
+
+---
+
+## 🧾 License
 
 This project is licensed under the MIT License.
 
 ---
 
-## 👨‍💻 Author
+## 👤 Author
 
 **Mahmood Alselawe**  
 [GitHub Repository](https://github.com/mahmood-alselawe/Bank_security_ms)
-
