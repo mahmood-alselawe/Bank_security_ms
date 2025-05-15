@@ -23,6 +23,22 @@ This is a Spring Boot application that handles user authentication, authorizatio
 
 ---
 
+
+
+## 🔗 API Endpoints
+
+### Auth Controller
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/register` | Register a new user |
+| `POST` | `/api/v1/auth/login` | Log in user |
+| `POST` | `/api/v1/auth/refresh-token` | Refresh JWT token |
+| `POST` | `/api/v1/auth/verifyMail/{email}` | Verify user's email |
+| `POST` | `/api/v1/auth/verifyOtp/{otp}/{email}` | Verify OTP for user |
+| `POST` | `/api/v1/auth/changePassword/{email}` | Reset password via email |
+
+---
 ## 🔐 Forgot Password Flow
 
 To implement a forgot password feature, follow these steps:
@@ -41,20 +57,6 @@ To implement a forgot password feature, follow these steps:
 
 ---
 
-## 🔗 API Endpoints
-
-### Auth Controller
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/auth/register` | Register a new user |
-| `POST` | `/api/v1/auth/login` | Log in user |
-| `POST` | `/api/v1/auth/refresh-token` | Refresh JWT token |
-| `POST` | `/api/v1/auth/verifyMail/{email}` | Verify user's email |
-| `POST` | `/api/v1/auth/verifyOtp/{otp}/{email}` | Verify OTP for user |
-| `POST` | `/api/v1/auth/changePassword/{email}` | Reset password via email |
-
----
 
 ### User Controller
 
@@ -82,7 +84,7 @@ To implement a forgot password feature, follow these steps:
 | `POST` | `/api/v1/bank/deposit` | Deposit money (OTP required) |
 | `POST` | `/api/v1/bank/debit` | Debit (withdraw) money (OTP required) |
 | `POST` | `/api/v1/bank/create/{email}` | Create bank account |
-| `POST` | `/api/v1/bank/create/account/{email}` | Alternate account creation |
+| `POST` | `/api/v1/bank/create/account/{email}` | Alternate account creation with image |
 | `POST` | `/api/v1/bank/accounts/unlock` | Unlock user account |
 | `POST` | `/api/v1/bank/accounts/lock` | Lock user account |
 | `GET` | `/api/v1/bank/nameEnquiry` | Get account name by number |
@@ -108,7 +110,8 @@ To implement a forgot password feature, follow these steps:
 - Swagger/OpenAPI
 - Lombok
 - Maven
-- AWS SES (for sending OTPs)
+- java mail sender (for send Email)
+- AWS S3 (for save image in AWS)
 
 ---
 
@@ -126,6 +129,7 @@ This project is licensed under the MIT License.
 ---
 
 ## 👤 Author
+** mahmoodselawe5@gmail.com**
 
 **Mahmood Alselawe**  
 [GitHub Repository](https://github.com/mahmood-alselawe/Bank_security_ms)
