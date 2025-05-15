@@ -122,16 +122,16 @@ If you have any questions or feedback, feel free to open an issue or reach out.
 
 ---
 
-## 🧾 License
+## 🧾 Contact info
 
-This project is licensed under the MIT License.
-
+Email: mahmoodselawe5@gmail.com 
+linkedin: mahmood-al-selawe
 ---
 
 ## 👤 Author
 
 
 **Mahmood Alselawe** 
-**mahmoodselawe5@gmail.com** 
+
 [GitHub Repository](https://github.com/mahmood-alselawe/Bank_security_ms)
 
